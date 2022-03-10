@@ -1,8 +1,4 @@
 ﻿#nullable disable
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -21,8 +17,10 @@ namespace MvcMovie.Controllers
         }
 
         // GET: Movies
-        public async Task<IActionResult> Index(string movieGenre, string searchString)
+        public async Task<IActionResult> Index(string sortOrder, string movieGenre, string searchString)
         {
+            ViewData["TitleSortParm"] = String.IsNullOrEmpty(sortOrder) ? "name_asc" : "";
+
             // Use LINQ to get list of genres.
             IQueryable<string> genreQuery = from m in _context.Movie
                                             orderby m.Genre
@@ -32,7 +30,7 @@ namespace MvcMovie.Controllers
                          select m;
 
             if (!string.IsNullOrEmpty(searchString))
-            {
+            {   
                 movies = movies.Where(s => s.Title!.Contains(searchString));
             }
 
@@ -40,6 +38,11 @@ namespace MvcMovie.Controllers
             {
                 movies = movies.Where(x => x.Genre == movieGenre);
             }
+
+            if(sortOrder == "name_asc")
+                movies = movies.OrderBy(x => x.Title);
+            else
+                movies = movies.OrderByDescending(x => x.Title);
 
             var movieGenreVM = new MovieGenreViewModel()
             {
@@ -60,6 +63,7 @@ namespace MvcMovie.Controllers
 
             var movie = await _context.Movie
                 .FirstOrDefaultAsync(m => m.Id == id);
+
             if (movie == null)
             {
                 return NotFound();
@@ -111,7 +115,7 @@ namespace MvcMovie.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,ReleaseDate,Genre,Price")] Movie movie)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,ReleaseDate,Genre,Price,Rating")] Movie movie)
         {
             if (id != movie.Id)
             {
