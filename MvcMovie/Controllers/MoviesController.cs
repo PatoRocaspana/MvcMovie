@@ -19,7 +19,8 @@ namespace MvcMovie.Controllers
         // GET: Movies
         public async Task<IActionResult> Index(string sortOrder, string movieGenre, string searchString)
         {
-            ViewData["TitleSortParm"] = String.IsNullOrEmpty(sortOrder) ? "name_asc" : "";
+            ViewData["TitleSortParm"] = String.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
+            ViewData["PriceSortParm"] = sortOrder == "Price" ? "price_desc" : "Price";
 
             // Use LINQ to get list of genres.
             IQueryable<string> genreQuery = from m in _context.Movie
@@ -39,15 +40,18 @@ namespace MvcMovie.Controllers
                 movies = movies.Where(x => x.Genre == movieGenre);
             }
 
-            if(sortOrder == "name_asc")
-                movies = movies.OrderBy(x => x.Title);
-            else
-                movies = movies.OrderByDescending(x => x.Title);
+            movies = sortOrder switch
+            {
+                "name_desc" => movies.OrderByDescending(x => x.Title),
+                "price_desc" => movies.OrderByDescending(x => x.Price),
+                "Date" => movies.OrderBy(x => x.Price),
+                _ => movies.OrderBy(x => x.Title),
+            };
 
             var movieGenreVM = new MovieGenreViewModel()
             {
                 Genres = new SelectList(await genreQuery.Distinct().ToListAsync()),
-                Movies = await movies.ToListAsync()
+                Movies = await movies.AsNoTracking().ToListAsync()
             };
 
             return View(movieGenreVM);

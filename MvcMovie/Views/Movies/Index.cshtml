@@ -34,7 +34,7 @@
                 @Html.DisplayNameFor(model => model.Movies[0].Genre)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Movies[0].Price)
+                <a asp-action="Index" asp-route-sortOrder="@ViewData["PriceSortParm"]">@Html.DisplayNameFor(model => model.Movies[0].Price)</a>
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.Movies[0].Rating)
