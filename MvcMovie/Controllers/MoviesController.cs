@@ -22,6 +22,7 @@ namespace MvcMovie.Controllers
             ViewData["TitleSortParm"] = String.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
             ViewData["PriceSortParm"] = sortOrder == "Price" ? "price_desc" : "Price";
             ViewData["CurrentSort"] = sortOrder;
+            ViewData["MovieGenre"] = movieGenre;
 
             if (searchString != null)
             {
